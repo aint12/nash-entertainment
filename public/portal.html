@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Portal | Nash Entertainment</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .portal-page {
+            min-height: 100vh; display: flex; align-items: center;
+            justify-content: center; padding: 6rem 1.5rem 4rem;
+        }
+        .portal-box {
+            background: var(--dark); border-radius: 12px; padding: 3rem;
+            width: 100%; max-width: 600px; border: 1px solid var(--gray);
+        }
+        .portal-box h2 { text-align: center; margin-bottom: 0.5rem; color: var(--white); }
+        .portal-box .sub { text-align: center; color: var(--light-gray); margin-bottom: 2rem; font-size: 0.95rem; }
+        .portal-box .form-group { margin-bottom: 1.25rem; }
+        .error-msg { color: var(--accent); text-align: center; margin-bottom: 1rem; display: none; font-size: 0.9rem; }
+
+        .upload-area { display: none; }
+        .upload-zone {
+            border: 2px dashed #444; border-radius: 10px; padding: 3rem 2rem;
+            text-align: center; cursor: pointer; transition: border-color 0.2s;
+            margin-bottom: 1.5rem;
+        }
+        .upload-zone:hover, .upload-zone.dragover { border-color: var(--accent); }
+        .upload-zone p { color: var(--light-gray); }
+        .upload-zone .big { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .file-list { margin-bottom: 1.5rem; }
+        .file-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--gray); padding: 0.75rem 1rem; border-radius: 6px;
+            margin-bottom: 0.5rem; font-size: 0.9rem;
+        }
+        .file-item .name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 1rem; }
+        .file-item .size { color: var(--light-gray); margin-right: 1rem; white-space: nowrap; }
+        .file-item .remove { color: var(--accent); cursor: pointer; background: none; border: none; font-size: 1.2rem; }
+        .progress-bar { width: 100%; height: 6px; background: var(--gray); border-radius: 3px; overflow: hidden; margin-bottom: 0.5rem; display: none; }
+        .progress-fill { height: 100%; background: var(--accent); width: 0; transition: width 0.3s; border-radius: 3px; }
+        .progress-text { text-align: center; color: var(--light-gray); font-size: 0.85rem; margin-bottom: 1rem; }
+        .upload-success { color: #4caf50; text-align: center; font-weight: 600; display: none; margin-top: 1rem; }
+        .back-link { text-align: center; margin-top: 2rem; }
+        .back-link a { color: var(--light-gray); font-size: 0.9rem; }
+
+        .message-box { margin-bottom: 1.5rem; }
+        .message-box label { margin-bottom: 0.4rem; display: block; font-weight: 600; font-size: 0.9rem; color: var(--off-white); }
+        .message-box textarea { width: 100%; padding: 0.75rem 1rem; font-size: 1rem; background: var(--gray); color: var(--white); border: 1px solid #444; border-radius: 6px; font-family: inherit; resize: vertical; }
+
+        /* TABS */
+        .portal-tabs { display: none; margin-bottom: 2rem; }
+        .portal-tabs.active { display: flex; gap: 0; border-bottom: 1px solid #444; }
+        .portal-tab {
+            flex: 1; padding: 0.75rem; text-align: center; cursor: pointer;
+            background: none; border: none; border-bottom: 2px solid transparent;
+            color: var(--light-gray); font-size: 0.95rem; font-weight: 600;
+            font-family: inherit; transition: all 0.2s;
+        }
+        .portal-tab:hover { color: var(--white); }
+        .portal-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+        /* DOWNLOADS */
+        .download-area { display: none; }
+        .download-list { margin-top: 0.5rem; }
+        .download-item {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--gray); padding: 0.85rem 1rem; border-radius: 8px;
+            margin-bottom: 0.5rem; transition: border-color 0.2s;
+            border: 1px solid transparent;
+        }
+        .download-item:hover { border-color: #555; }
+        .download-info { flex: 1; min-width: 0; margin-right: 1rem; }
+        .download-name {
+            color: var(--white); font-weight: 600; font-size: 0.9rem;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .download-meta { color: var(--light-gray); font-size: 0.75rem; margin-top: 0.2rem; }
+        .download-btn {
+            background: var(--accent); color: var(--white); border: none;
+            padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;
+            font-size: 0.8rem; font-weight: 600; white-space: nowrap;
+            font-family: inherit; transition: background 0.2s;
+        }
+        .download-btn:hover { background: var(--accent-hover); }
+        .download-empty {
+            text-align: center; color: var(--light-gray); padding: 2rem;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo">NASH<span>ENTERTAINMENT</span></a>
+        <ul class="nav-links">
+            <li><a href="/">Back to Site</a></li>
+            <li><a href="#" id="logoutBtn" style="display:none;">Log Out</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="portal-page">
+    <div class="portal-box">
+
+        <div id="loginArea">
+            <h2>Client Portal</h2>
+            <p class="sub">Log in to upload files to Nash Entertainment</p>
+            <p class="error-msg" id="loginError">Invalid username or password.</p>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Log In</button>
+            </form>
+        </div>
+
+        <div class="portal-tabs" id="portalTabs">
+            <button class="portal-tab active" data-tab="upload">Upload</button>
+            <button class="portal-tab" data-tab="downloads">Downloads</button>
+        </div>
+
+        <div id="uploadArea" class="upload-area">
+            <h2>Upload Files</h2>
+            <p class="sub">Drag and drop your raw footage here (up to 7 GB per file)</p>
+
+            <div class="upload-zone" id="dropZone">
+                <p class="big">&#128193;</p>
+                <p>Drag files here or click to browse</p>
+            </div>
+            <input type="file" id="fileInput" multiple style="display:none;">
+
+            <div class="file-list" id="fileList"></div>
+
+            <div class="message-box">
+                <label for="uploadMessage">Message (optional)</label>
+                <textarea id="uploadMessage" rows="3" placeholder="Notes about these files..."></textarea>
+            </div>
+
+            <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+            <p class="progress-text" id="progressText"></p>
+
+            <button class="btn btn-primary btn-full" id="uploadBtn" disabled>Upload Files</button>
+            <p class="upload-success" id="uploadSuccess">Files uploaded successfully!</p>
+        </div>
+
+        <div id="downloadArea" class="download-area">
+            <h2>Your Files</h2>
+            <p class="sub">Download your finished projects</p>
+            <div class="download-list" id="downloadList">
+                <p class="download-empty">Loading...</p>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="/">&larr; Back to nashentertainment.com</a>
+        </div>
+    </div>
+</div>
+
+<script src="js/portal.js"></script>
+</body>
+</html>

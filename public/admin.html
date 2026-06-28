@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | Nash Entertainment</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-page {
+            min-height: 100vh; padding: 6rem 1.5rem 4rem;
+        }
+        .admin-container { max-width: 800px; margin: 0 auto; }
+        .admin-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;
+        }
+        .admin-header h1 { font-size: 1.8rem; color: var(--white); }
+        .admin-badge {
+            background: var(--accent); color: var(--white); font-size: 0.75rem;
+            padding: 0.3rem 0.8rem; border-radius: 50px; font-weight: 700;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .admin-section {
+            background: var(--dark); border: 1px solid var(--gray);
+            border-radius: 12px; padding: 2rem; margin-bottom: 2rem;
+        }
+        .admin-section h2 {
+            font-size: 1.2rem; color: var(--white); margin-bottom: 0.25rem;
+        }
+        .admin-section .sub {
+            color: var(--light-gray); font-size: 0.9rem; margin-bottom: 1.5rem;
+        }
+
+        /* Create client form */
+        .create-form { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: flex-end; }
+        .create-form .field { flex: 1; min-width: 150px; }
+        .create-form label {
+            display: block; font-size: 0.8rem; font-weight: 600;
+            color: var(--off-white); margin-bottom: 0.3rem;
+        }
+        .create-form input {
+            width: 100%; padding: 0.6rem 0.8rem; font-size: 0.9rem;
+            background: var(--gray); color: var(--white); border: 1px solid #444;
+            border-radius: 6px; font-family: inherit;
+        }
+        .create-form input:focus { outline: none; border-color: var(--accent); }
+        .create-msg {
+            width: 100%; margin-top: 0.5rem; font-size: 0.85rem;
+            font-weight: 600; display: none;
+        }
+        .create-msg.success { color: #4caf50; }
+        .create-msg.error { color: var(--accent); }
+
+        /* Client list */
+        .client-row {
+            display: flex; align-items: center; justify-content: space-between;
+            background: var(--gray); padding: 0.85rem 1rem; border-radius: 8px;
+            margin-bottom: 0.5rem; gap: 1rem;
+        }
+        .client-info { flex: 1; }
+        .client-name { color: var(--white); font-weight: 700; font-size: 0.95rem; }
+        .client-meta { color: var(--light-gray); font-size: 0.75rem; margin-top: 0.15rem; }
+        .client-actions { display: flex; gap: 0.5rem; }
+        .btn-small {
+            padding: 0.4rem 0.75rem; font-size: 0.75rem; border-radius: 5px;
+            border: none; cursor: pointer; font-weight: 600; font-family: inherit;
+            transition: background 0.2s;
+        }
+        .btn-reset { background: #444; color: var(--off-white); }
+        .btn-reset:hover { background: #555; }
+        .btn-delete { background: var(--accent); color: var(--white); }
+        .btn-delete:hover { background: var(--accent-hover); }
+        .empty-state { color: var(--light-gray); text-align: center; padding: 1.5rem; }
+
+        /* Quotes */
+        .quote-row {
+            background: var(--gray); padding: 1rem; border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+        .quote-top {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;
+        }
+        .quote-name { color: var(--white); font-weight: 700; font-size: 0.95rem; }
+        .quote-date { color: var(--light-gray); font-size: 0.75rem; }
+        .quote-detail { color: var(--off-white); font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .quote-detail span { color: var(--light-gray); }
+        .quote-body {
+            color: var(--light-gray); font-size: 0.85rem; margin-top: 0.5rem;
+            padding-top: 0.5rem; border-top: 1px solid #444;
+            white-space: pre-wrap;
+        }
+
+        /* Reset password modal */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; z-index: 300;
+            background: rgba(0,0,0,0.8); align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--dark); border: 1px solid var(--gray);
+            border-radius: 12px; padding: 2rem; width: 100%; max-width: 380px;
+        }
+        .modal-box h3 { color: var(--white); margin-bottom: 1rem; font-size: 1.1rem; }
+        .modal-box input {
+            width: 100%; padding: 0.65rem 0.8rem; font-size: 0.95rem;
+            background: var(--gray); color: var(--white); border: 1px solid #444;
+            border-radius: 6px; font-family: inherit; margin-bottom: 1rem;
+        }
+        .modal-box input:focus { outline: none; border-color: var(--accent); }
+        .modal-actions { display: flex; gap: 0.75rem; }
+        .modal-actions .btn { flex: 1; text-align: center; }
+        .btn-cancel { background: #444; color: var(--off-white); }
+        .btn-cancel:hover { background: #555; }
+
+        .back-link { text-align: center; margin-top: 2rem; }
+        .back-link a { color: var(--light-gray); font-size: 0.9rem; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo">NASH<span>ENTERTAINMENT</span></a>
+        <ul class="nav-links">
+            <li><a href="/">Back to Site</a></li>
+            <li><a href="/portal">Client Portal</a></li>
+            <li><a href="#" id="logoutBtn">Log Out</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="admin-page">
+    <div class="admin-container">
+
+        <div class="admin-header">
+            <h1>Admin Panel</h1>
+            <span class="admin-badge">Admin</span>
+        </div>
+
+        <div class="admin-section">
+            <h2>Create Client Account</h2>
+            <p class="sub">Give a client access to upload and download files</p>
+            <form class="create-form" id="createForm">
+                <div class="field">
+                    <label for="newUser">Username</label>
+                    <input type="text" id="newUser" placeholder="e.g. johndoe" required>
+                </div>
+                <div class="field">
+                    <label for="newPass">Password</label>
+                    <input type="text" id="newPass" placeholder="Min 6 characters" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Create</button>
+                <p class="create-msg" id="createMsg"></p>
+            </form>
+        </div>
+
+        <div class="admin-section">
+            <h2>Client Accounts</h2>
+            <p class="sub">Manage existing clients</p>
+            <div id="clientList"><p class="empty-state">Loading...</p></div>
+        </div>
+
+        <div class="admin-section">
+            <h2>Quote Requests</h2>
+            <p class="sub">Incoming requests from the website</p>
+            <div id="quoteList"><p class="empty-state">Loading...</p></div>
+        </div>
+
+        <div class="back-link">
+            <a href="/">&larr; Back to nashentertainment.com</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="resetModal">
+    <div class="modal-box">
+        <h3>Reset Password for <span id="resetUser"></span></h3>
+        <input type="text" id="resetPass" placeholder="New password (min 6 characters)">
+        <div class="modal-actions">
+            <button class="btn btn-cancel" id="resetCancel">Cancel</button>
+            <button class="btn btn-primary" id="resetConfirm">Reset</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var token = sessionStorage.getItem('token');
+var role = sessionStorage.getItem('role');
+
+if (!token || role !== 'admin') {
+    window.location.href = '/portal';
+}
+
+document.getElementById('logoutBtn').addEventListener('click', function (e) {
+    e.preventDefault();
+    sessionStorage.clear();
+    window.location.href = '/portal';
+});
+
+function api(method, url, body) {
+    var opts = { method: method, headers: { 'Authorization': 'Bearer ' + token } };
+    if (body) {
+        opts.headers['Content-Type'] = 'application/json';
+        opts.body = JSON.stringify(body);
+    }
+    return fetch(url, opts).then(function (res) {
+        if (res.status === 401) { sessionStorage.clear(); window.location.href = '/portal'; }
+        return res.json();
+    });
+}
+
+function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+}
+
+function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    if (bytes < 1073741824) return (bytes / 1048576).toFixed(1) + ' MB';
+    return (bytes / 1073741824).toFixed(2) + ' GB';
+}
+
+// Create client
+document.getElementById('createForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var msg = document.getElementById('createMsg');
+    var username = document.getElementById('newUser').value;
+    var password = document.getElementById('newPass').value;
+
+    api('POST', '/api/admin/clients', { username: username, password: password })
+    .then(function (data) {
+        if (data.error) {
+            msg.textContent = data.error;
+            msg.className = 'create-msg error';
+        } else {
+            msg.textContent = 'Created account: ' + data.username;
+            msg.className = 'create-msg success';
+            document.getElementById('newUser').value = '';
+            document.getElementById('newPass').value = '';
+            loadClients();
+        }
+        msg.style.display = 'block';
+        setTimeout(function () { msg.style.display = 'none'; }, 4000);
+    });
+});
+
+// Load clients
+function loadClients() {
+    api('GET', '/api/admin/clients').then(function (clients) {
+        var list = document.getElementById('clientList');
+        if (!clients.length) {
+            list.innerHTML = '<p class="empty-state">No client accounts yet.</p>';
+            return;
+        }
+        list.innerHTML = '';
+        clients.forEach(function (c) {
+            var div = document.createElement('div');
+            div.className = 'client-row';
+            div.innerHTML =
+                '<div class="client-info">' +
+                    '<div class="client-name">' + escapeHtml(c.username) + '</div>' +
+                    '<div class="client-meta">' + c.deliveryFiles + ' delivery file' + (c.deliveryFiles !== 1 ? 's' : '') + '</div>' +
+                '</div>' +
+                '<div class="client-actions">' +
+                    '<button class="btn-small btn-reset" data-user="' + escapeHtml(c.username) + '">Reset Password</button>' +
+                    '<button class="btn-small btn-delete" data-user="' + escapeHtml(c.username) + '">Delete</button>' +
+                '</div>';
+            list.appendChild(div);
+        });
+
+        list.querySelectorAll('.btn-delete').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var user = this.dataset.user;
+                if (confirm('Delete client "' + user + '"? Their files will remain on disk.')) {
+                    api('DELETE', '/api/admin/clients/' + encodeURIComponent(user)).then(function () {
+                        loadClients();
+                    });
+                }
+            });
+        });
+
+        list.querySelectorAll('.btn-reset').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var user = this.dataset.user;
+                document.getElementById('resetUser').textContent = user;
+                document.getElementById('resetPass').value = '';
+                document.getElementById('resetModal').classList.add('active');
+            });
+        });
+    });
+}
+
+// Reset password modal
+document.getElementById('resetCancel').addEventListener('click', function () {
+    document.getElementById('resetModal').classList.remove('active');
+});
+document.getElementById('resetConfirm').addEventListener('click', function () {
+    var user = document.getElementById('resetUser').textContent;
+    var pass = document.getElementById('resetPass').value;
+    if (pass.length < 6) { alert('Password must be at least 6 characters'); return; }
+    api('POST', '/api/admin/clients/reset-password', { username: user, password: pass })
+    .then(function (data) {
+        if (data.error) { alert(data.error); return; }
+        document.getElementById('resetModal').classList.remove('active');
+        alert('Password reset for ' + user);
+    });
+});
+
+// Load quotes
+function loadQuotes() {
+    api('GET', '/api/admin/quotes').then(function (quotes) {
+        var list = document.getElementById('quoteList');
+        if (!quotes.length) {
+            list.innerHTML = '<p class="empty-state">No quote requests yet.</p>';
+            return;
+        }
+        list.innerHTML = '';
+        quotes.forEach(function (q) {
+            var div = document.createElement('div');
+            div.className = 'quote-row';
+            var date = new Date(q.date).toLocaleDateString();
+            div.innerHTML =
+                '<div class="quote-top">' +
+                    '<span class="quote-name">' + escapeHtml(q.name) + '</span>' +
+                    '<span class="quote-date">' + date + '</span>' +
+                '</div>' +
+                '<div class="quote-detail"><span>Email:</span> ' + escapeHtml(q.email) + '</div>' +
+                (q.phone ? '<div class="quote-detail"><span>Phone:</span> ' + escapeHtml(q.phone) + '</div>' : '') +
+                '<div class="quote-detail"><span>Service:</span> ' + escapeHtml(q.service) + '</div>' +
+                (q.budget ? '<div class="quote-detail"><span>Budget:</span> ' + escapeHtml(q.budget) + '</div>' : '') +
+                '<div class="quote-body">' + escapeHtml(q.details) + '</div>';
+            list.appendChild(div);
+        });
+    });
+}
+
+loadClients();
+loadQuotes();
+</script>
+
+</body>
+</html>
